@@ -3,7 +3,6 @@ package org.example.cal.controller
 import org.example.cal.dto.CalculatorRequest
 import org.example.cal.dto.CalculatorResponse
 import org.example.cal.service.CalculatorService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping

@@ -24,7 +24,6 @@ class CalculatorService {
                 require(operand2.compareTo(BigDecimal.ZERO) != 0) {"0으로 나눌 수 없습니다."}
                 CalculatorResponse(operand1.divide(operand2, 5, RoundingMode.HALF_UP))
             }
-            else -> throw IllegalArgumentException("Invalid operator")
         }
     }
 }

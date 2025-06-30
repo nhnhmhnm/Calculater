@@ -19,7 +19,7 @@ class CalculatorService {
             Operator.MINUS-> CalculatorResponse(operand1.subtract(operand2))
             Operator.MULTIPLY -> CalculatorResponse(operand1.multiply(operand2))
             Operator.DIVIDE-> {
-                if (operand2 == BigDecimal.ZERO) throw DivideByZeroException()
+                if (operand2.compareTo(BigDecimal.ZERO) == 0) throw DivideByZeroException()
                 CalculatorResponse(operand1.divide(operand2, 10, RoundingMode.HALF_UP))
             }
         }

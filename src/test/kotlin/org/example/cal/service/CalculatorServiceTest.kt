@@ -131,7 +131,5 @@ class CalculatorServiceTest : BehaviorSpec({
                 exception.message shouldBe "Invalid operator : ' '"
             }
         }
-//        When("올바르지 않은 숫자를 입력한 경우 ") {
-//        }
     }
 })

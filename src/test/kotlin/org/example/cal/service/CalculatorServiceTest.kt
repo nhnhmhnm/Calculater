@@ -1,8 +1,13 @@
 package org.example.cal.service
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.startWith
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.startWith
 import org.example.cal.dto.CalculatorRequest
+import org.example.cal.exception.DivideByZeroException
+import org.example.cal.exception.InvalidOperatorException
 import java.math.BigDecimal
 
 class CalculatorServiceTest : BehaviorSpec({
@@ -91,25 +96,42 @@ class CalculatorServiceTest : BehaviorSpec({
         }
         When("연산자가 /일 경우") {
             Then("두 수를 나눈다. (나누어 떨어질 경우)") {
-                val request = CalculatorRequest(BigDecimal("4"), BigDecimal("2.2"), "/")
-                calculatorService.calculate(request).result shouldBe BigDecimal("1.8181818182")
-            }
-            Then("두 수를 나눈다. (나누어 떨어지지 않을 경우 -> 반올림)") {
                 val request = CalculatorRequest(BigDecimal("2.2"), BigDecimal("4"), "/")
                 calculatorService.calculate(request).result shouldBe BigDecimal("0.5500000000")
+//                val result = calculatorService.calculate(request)
+//                result shouldBe BigDecimal("0.5500000000")
+            }
+            Then("두 수를 나눈다. (나누어 떨어지지 않을 경우 -> 반올림)") {
+                val request = CalculatorRequest(BigDecimal("4"), BigDecimal("2.2"), "/")
+                calculatorService.calculate(request).result shouldBe BigDecimal("1.8181818182")
+//                val result = calculatorService.calculate(request)
+//                result shouldBe BigDecimal("1.8181818182")
             }
         }
     }
 
-//    Given("예외 상황이 발생한 경우") {
-//        When("0으로 나눈 경우") {
-//
-//        }
-//        When("지원하지 않는 연산자를 사용한 경우") {
-//
-//        }
+    Given("예외 상황이 발생한 경우") {
+        When("0으로 나눈 경우") {
+            Then("DivideByZeroException이 발생해야 한다.") {
+                val request = CalculatorRequest(BigDecimal("5"), BigDecimal("0"), "/")
+
+                val exception = shouldThrow<DivideByZeroException> {
+                    calculatorService.calculate(request)
+                }
+                exception.message shouldBe startWith("Can not divide by zero")
+            }
+        }
+        When("지원하지 않는 연산자를 사용한 경우") {
+            Then("InvalidOperatorException이 발생해야 한다.") {
+                val request = CalculatorRequest(BigDecimal("5"), BigDecimal("5"), " ")
+
+                val exception = shouldThrow<InvalidOperatorException> {
+                    calculatorService.calculate(request)
+                }
+                exception.message shouldBe "Invalid operator : ' '"
+            }
+        }
 //        When("올바르지 않은 숫자를 입력한 경우 ") {
-//
 //        }
-//    }
+    }
 })

@@ -127,6 +127,7 @@ class CalculatorServiceTest : BehaviorSpec({
                 val exception = shouldThrow<DivideByZeroException> {
                     calculatorService.calculate(request)
                 }
+                // 시작만 비교
                 exception.message shouldBe startWith("Can not divide by zero")
             }
         }
@@ -137,6 +138,7 @@ class CalculatorServiceTest : BehaviorSpec({
                 val exception = shouldThrow<InvalidOperatorException> {
                     calculatorService.calculate(request)
                 }
+                // 정확한 값 비교
                 exception.message shouldBe "Invalid operator : ' '"
             }
         }

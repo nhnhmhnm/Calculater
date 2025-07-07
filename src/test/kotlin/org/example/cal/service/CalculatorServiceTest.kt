@@ -5,8 +5,8 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.startWith
 import org.example.cal.dto.CalculatorRequest
-import org.example.cal.exception.DivideByZeroException
-import org.example.cal.exception.InvalidOperatorException
+import org.example.cal.exception.CustomException
+import org.example.cal.exception.CustomExceptionWrapper
 import java.math.BigDecimal
 
 class CalculatorServiceTest : BehaviorSpec({
@@ -114,32 +114,32 @@ class CalculatorServiceTest : BehaviorSpec({
             Then("DivideByZeroException이 발생해야 한다.") {
                 val request = CalculatorRequest(BigDecimal("5"), BigDecimal("0"), "/")
 
-                val exception = shouldThrow<DivideByZeroException> {
+                val exception = shouldThrow<CustomExceptionWrapper> {
                     calculatorService.calculate(request)
                 }
-                exception.message shouldBe startWith("Can not divide by zero")
+                // message가 아닌 code로 비교
+                exception.error.code shouldBe CustomException.DIVIDE_BY_ZERO.code
             }
         }
         When("0.0으로 나눈 경우") {
             Then("DivideByZeroException이 발생해야 한다.") {
                 val request = CalculatorRequest(BigDecimal("5"), BigDecimal("0.0"), "/")
 
-                val exception = shouldThrow<DivideByZeroException> {
+                val exception = shouldThrow<CustomExceptionWrapper> {
                     calculatorService.calculate(request)
                 }
-                // 시작만 비교
-                exception.message shouldBe startWith("Can not divide by zero")
+                exception.error.code shouldBe CustomException.DIVIDE_BY_ZERO.code
             }
         }
         When("지원하지 않는 연산자를 사용한 경우") {
             Then("InvalidOperatorException이 발생해야 한다.") {
                 val request = CalculatorRequest(BigDecimal("5"), BigDecimal("5"), " ")
 
-                val exception = shouldThrow<InvalidOperatorException> {
+                val exception = shouldThrow<CustomExceptionWrapper> {
                     calculatorService.calculate(request)
                 }
                 // 정확한 값 비교
-                exception.message shouldBe "Invalid operator : ' '"
+                exception.error.code shouldBe CustomException.INVALID_OPERATOR.code
             }
         }
     }

@@ -1,4 +1,4 @@
-package org.example.cal.dto
+package org.example.calculator.dto
 
 import java.math.BigDecimal
 

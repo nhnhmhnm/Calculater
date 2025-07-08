@@ -1,8 +1,8 @@
-package org.example.cal.domain
+package org.example.calculator.domain
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import org.example.cal.exception.CustomException
-import org.example.cal.exception.CustomExceptionWrapper
+import org.example.exception.CustomException
+import org.example.exception.CustomExceptionWrapper
 
 enum class Operator(val symbol: String) {
     PLUS("+"),

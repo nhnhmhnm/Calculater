@@ -1,4 +1,4 @@
-package org.example.cal.exception
+package org.example.exception
 
 class CustomExceptionWrapper(
     val error: CustomException,

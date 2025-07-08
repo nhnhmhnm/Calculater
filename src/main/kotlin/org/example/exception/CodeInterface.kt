@@ -1,4 +1,4 @@
-package org.example.cal.exception
+package org.example.exception
 
 interface CodeInterface {
     val status: Int                  // http status code

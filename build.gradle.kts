@@ -22,11 +22,13 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation") // DTO에서 @Valid, @NotBlank, @NotNull 등을 사용할 수 있게
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+
+    // database
+    runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("com.h2database:h2")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // kotest
     testImplementation("org.springframework.boot:spring-boot-starter-test")

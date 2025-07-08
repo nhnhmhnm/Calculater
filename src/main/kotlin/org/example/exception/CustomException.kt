@@ -11,7 +11,6 @@ enum class CustomException(
 
     // user exception
     USER_NOT_FOUND(404, "U001", "User not found"),
-    DUPLICATE_USERID(400, "U002", "Already existed ID"),
+    DUPLICATE_USERID(400, "U002", "This ID is duplicated."),
     INVALID_PASSWORD(400, "U003", "Invalid password"),
-    UNAUTHORIZED_USER(401, "U004", "Unauthorized user access")
 }

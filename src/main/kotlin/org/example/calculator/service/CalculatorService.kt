@@ -46,4 +46,18 @@ class CalculatorService(
 
         return CalculatorResponse(result)
     }
+
+    fun getCalculatorLog(userId: Long): List<CalculatorLogResponse> {
+        val records = calculatorRepository.findByUser_Id(userId)
+
+        return records.map {
+            CalculatorLogResponse(
+                operand1 = it.operand1,
+                operator = it.operator,
+                operand2 = it.operand2,
+                result = it.result,
+                time = it.time
+            )
+        }
+    }
 }

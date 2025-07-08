@@ -18,4 +18,9 @@ class CalculatorController (
     fun calculate(@PathVariable userID: Long, @RequestBody request: CalculatorRequest): CalculatorResponse {
         return calculatorService.calculate(userID, request)
     }
+
+    @GetMapping("/{user_id}")
+    fun getCalculatorLog(@PathVariable user_id: Long): List<CalculatorLogResponse> {
+        return calculatorService.getCalculatorLog(user_id)
+    }
 }

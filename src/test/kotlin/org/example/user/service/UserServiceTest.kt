@@ -19,35 +19,36 @@ class UserServiceTest : BehaviorSpec({
     val userService = UserService(userRepository)
 
     Given("사용자 생성 요청이 주어졌을 때") {
-        val request = CreateUserRequest("nam", "0000")
+        val validRequest = CreateUserRequest("nam", "0000")
 
         When("중복된 userID가 존재하는 경우") {
-            every { userRepository.existsByUserID("nam") } returns true
-
             Then("DUPLICATE_USERID 예외가 발생한다.") {
+                every { userRepository.existsByUserID("nam") } returns true
+
                 val exception = shouldThrow<CustomExceptionWrapper> {
-                    userService.createUser(request)
+                    userService.createUser(validRequest)
                 }
                 exception.error shouldBe CustomException.DUPLICATE_USERID
             }
         }
-        When("중복된 userID가 존재하지 않는 경우 & 잘못된 userPW가 주어진 경우") {
-            val request = CreateUserRequest("nam", "")
-            every { userRepository.existsByUserID("nam") } returns false
+        When("중복된 userID가 존재하지 않지만 잘못된 userPW가 주어진 경우") {
+            val badPwRequest = CreateUserRequest("nam", "")
 
             Then("INVALID_PASSWORD 예외가 발생한다.") {
+                every { userRepository.existsByUserID("nam") } returns false
+
                 val exception = shouldThrow<CustomExceptionWrapper> {
-                    userService.createUser(request)
+                    userService.createUser(badPwRequest)
                 }
                 exception.error shouldBe CustomException.INVALID_PASSWORD
             }
         }
-        When("중복된 userID가 존재하지 않는 경우 & 올바른 userPW가 주어진 경우") {
-            every { userRepository.existsByUserID("nam") } returns false
-            every { userRepository.save(any()) } returns User(1L, "nam", "0000")
-
+        When("중복된 userID가 존재하지 않고 올바른 userPW가 주어진 경우") {
             Then("사용자를 생성한다.") {
-                val result = userService.createUser(request)
+                every { userRepository.existsByUserID("nam") } returns false
+                every { userRepository.save(any()) } returns User(1L, "nam", "0000")
+
+                val result = userService.createUser(validRequest)
                 result.userID shouldBe "nam"
             }
         }
@@ -56,20 +57,20 @@ class UserServiceTest : BehaviorSpec({
     Given("사용자 조회 요청이 주어졌을 때") {
         val user = User(1L, "nam", "0000")
 
-        When("user_id가 틀린 경우") {
-            every { userRepository.findById(9999L) } returns Optional.empty()
-
+        When("user_id가 존재하지 않는 경우") {
             Then("USER_NOT_FOUND 예외가 발생한다.") {
+                every { userRepository.findById(9999L) } returns Optional.empty()
+
                 val exception = shouldThrow<CustomExceptionWrapper> {
                     userService.getUser(9999L)
                 }
                 exception.error shouldBe CustomException.USER_NOT_FOUND
             }
         }
-        When("user_id가 올바른 경우") {
-            every { userRepository.findById(1L) } returns Optional.of(user)
-
+        When("user_id가 존재하는 경우") {
             Then("사용자 정보를 반환한다.") {
+                every { userRepository.findById(1L) } returns Optional.of(user)
+
                 val result = userService.getUser(1L)
                 result.userID shouldBe "nam"
             }
@@ -79,30 +80,31 @@ class UserServiceTest : BehaviorSpec({
     Given("사용자 비밀번호 변경 요청이 주어졌을 때") {
         val user = User(1L, "nam", "0000")
 
-        When("user_id가 틀린 경우") {
-            every { userRepository.findById(9999L) } returns Optional.of(user)
-
+        When("user_id가 존재하지 않는 경우") {
             Then("USER_NOT_FOUND 예외가 발생한다.") {
+                every { userRepository.findById(9999L) } returns Optional.empty()
+
                 val exception = shouldThrow<CustomExceptionWrapper> {
-                    userService.getUser(9999L)
+                    userService.updateUserPassword(9999L, UpdateUserPasswordRequest("0000", "1111"))
                 }
                 exception.error shouldBe CustomException.USER_NOT_FOUND
             }
         }
-        When("user_id가 올바른 경우 & 현재 비밀번호가 틀린 경우") {
-            every { userRepository.findById(1L) } returns Optional.of(user)
-
+        When("현재 비밀번호가 틀린 경우") {
             Then("INVALID_PASSWORD 예외가 발생한다.") {
+                every { userRepository.findById(1L) } returns Optional.of(user)
+
                 val exception = shouldThrow<CustomExceptionWrapper> {
                     userService.updateUserPassword(1L, UpdateUserPasswordRequest("wrong", "1111"))
                 }
                 exception.error shouldBe CustomException.INVALID_PASSWORD
             }
         }
-        When("user_id가 올바른 경우 & 새 비밀번호가 올바르지 않은 경우") {
-            every { userRepository.findById(1L) } returns Optional.of(user)
 
-            Then("INVALID_PASSWORD 예외가 발생한다") {
+        When("새 비밀번호가 올바르지 않은 경우") {
+            Then("INVALID_PASSWORD 예외가 발생한다.") {
+                every { userRepository.findById(1L) } returns Optional.of(user)
+
                 val exception = shouldThrow<CustomExceptionWrapper> {
                     userService.updateUserPassword(1L, UpdateUserPasswordRequest("0000", ""))
                 }
@@ -110,10 +112,10 @@ class UserServiceTest : BehaviorSpec({
             }
         }
         When("user_id, 현재 비밀번호, 새 비밀번호가 모두 올바르면") {
-            every { userRepository.findById(1L) } returns Optional.of(user)
-            every { userRepository.save(any()) } returns user.copy(userPW = "0000")
-
             Then("비밀번호가 변경된다.") {
+                every { userRepository.findById(1L) } returns Optional.of(user)
+                every { userRepository.save(any()) } returns user.copy(userPW = "9999")
+
                 val result = userService.updateUserPassword(1L, UpdateUserPasswordRequest("0000", "9999"))
                 result.userID shouldBe "nam"
             }
@@ -123,22 +125,23 @@ class UserServiceTest : BehaviorSpec({
     Given("사용자 삭제 요청이 주어졌을 때") {
         val user = User(1L, "nam", "9999")
 
-        When("존재하지 않는 사용자인 경우") {
-            every { userRepository.findById(9999L) } returns Optional.empty()
-
+        When("user_id가 존재하지 않는 경우") {
             Then("USER_NOT_FOUND 예외가 발생한다.") {
+                every { userRepository.findById(9999L) } returns Optional.empty()
+
                 val exception = shouldThrow<CustomExceptionWrapper> {
                     userService.deleteUser(9999L)
                 }
                 exception.error shouldBe CustomException.USER_NOT_FOUND
             }
         }
-        When("존재하는 사용자인 경우") {
-            every { userRepository.findById(1L) } returns Optional.of(user)
-            every { userRepository.delete(user) } returns Unit
 
-            Then("사용자가 삭제된다") {
+        When("user_id가 존재하는 경우") {
+            Then("사용자가 삭제된다.") {
+                every { userRepository.findById(1L) } returns Optional.of(user)
+
                 userService.deleteUser(1L)
+
                 verify { userRepository.delete(user) }
             }
         }

@@ -14,9 +14,9 @@ class CalculatorController (
 //    @Autowired
 //    private lateinit var calculatorService: CalculatorService
 
-    @PostMapping("/{userID}")
-    fun calculate(@PathVariable userID: Long, @RequestBody request: CalculatorRequest): CalculatorResponse {
-        return calculatorService.calculate(userID, request)
+    @PostMapping("/{user_id}")
+    fun calculate(@PathVariable user_id: Long, @RequestBody request: CalculatorRequest): CalculatorResponse {
+        return calculatorService.calculate(user_id, request)
     }
 
     @GetMapping("/{user_id}")

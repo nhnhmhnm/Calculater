@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.example.exception.CustomException
 import org.example.exception.CustomExceptionWrapper
@@ -14,6 +15,10 @@ import org.example.user.dto.UpdateUserPasswordRequest
 import org.example.user.repository.UserRepository
 import java.util.*
 
+// every { ... } returns/throws ... : 메소드가 호출되면 어떤 값을 리턴할 지
+// 실제 DB에 접근하지 않고, 테스트 용으로 지정한 결과를 반환하도록
+
+// verify { ... } : 정상적인 경우 실제로 메소드가 호출 됐는지 확인 ex) 저장, 삭제, 외부 api 호출 여부, 특정 조건에만 호출되는 메소드
 class UserServiceTest : BehaviorSpec({
     val userRepository = mockk<UserRepository>(relaxed = true)
     val userService = UserService(userRepository)
@@ -44,12 +49,22 @@ class UserServiceTest : BehaviorSpec({
             }
         }
         When("중복된 userID가 존재하지 않고 올바른 userPW가 주어진 경우") {
-            Then("사용자를 생성한다.") {
+            val slot = slot<User>()
+
+            Then("사용자를 생성하고 저장한다.") {
                 every { userRepository.existsByUserID("nam") } returns false
-                every { userRepository.save(any()) } returns User(1L, "nam", "0000")
+                every { userRepository.save(capture(slot)) } returns User(1L, "nam", "0000")
 
                 val result = userService.createUser(validRequest)
+
                 result.userID shouldBe "nam"
+
+                // save가 호출 됐는지
+                verify(exactly = 1) { userRepository.save(any()) }
+
+                // 잘 저장됐는지
+                slot.captured.userID shouldBe "nam"
+                slot.captured.userPW shouldBe "0000"
             }
         }
     }

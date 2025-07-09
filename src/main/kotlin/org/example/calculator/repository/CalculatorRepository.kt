@@ -43,7 +43,9 @@ class CalculatorRepository(
 //            calculator.time
 //        }
 
-        val simpleJdbcOrderInsert = SimpleJdbcInsert(jdbcTemplate).withTableName("calculations").usingGeneratedKeyColumns("id")
+        val simpleJdbcOrderInsert = SimpleJdbcInsert(jdbcTemplate)
+            .withTableName("calculations")
+            .usingGeneratedKeyColumns("id")
 
         val values = mapOf(
             "user_id" to calculator.user_id,
@@ -55,10 +57,9 @@ class CalculatorRepository(
         )
         val newId = simpleJdbcOrderInsert.executeAndReturnKey(values).toLong()
 
-        calculator.id = newId
         log.info("Generated key insert: $newId")
 
-        return calculator
+        return calculator.copy(id = newId)
     }
 
     // 특정 사용자(user_id)의 계산 기록 조회 (시간순 내림차순)

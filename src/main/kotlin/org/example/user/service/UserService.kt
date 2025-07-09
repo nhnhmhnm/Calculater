@@ -46,6 +46,7 @@ class UserService(
             throw CustomExceptionWrapper(CustomException.INVALID_PASSWORD)
         }
 
+        // copy : 기존 객체를 복제하면서 일부 프로퍼티 변경 가능 -> 새로운 객체 생성
         val updated = user.copy(userPW = request.newPassword)
         return userRepository.save(updated).toResponse()
     }
@@ -57,5 +58,6 @@ class UserService(
         userRepository.delete(user)
     }
 
+    // entity 객체를 외부로 직접 반환하지 않고, dto로 변환해서 반환 -> 보안, 필요한 정보만 전달
     private fun User.toResponse() = UserResponse(id = id,  userID = userID, userPW = userPW)
 }

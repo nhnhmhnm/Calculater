@@ -8,7 +8,6 @@ import org.example.calculator.dto.CalculatorResponse
 import org.example.calculator.repository.CalculatorRepository
 import org.example.exception.CustomException
 import org.example.exception.CustomExceptionWrapper
-import org.example.user.repository.UserRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -50,6 +49,7 @@ class CalculatorService(
     fun getCalculatorLog(user_id: Long): List<CalculatorLogResponse> {
         val records = calculatorRepository.findByUser_Id(user_id)
 
+        // map : list의 각 요소를 변환해서 새 list로 만든다.
         return records.map {
             CalculatorLogResponse(
                 operand1 = it.operand1,

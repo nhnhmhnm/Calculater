@@ -47,6 +47,8 @@ class CalculatorRepository(
             .withTableName("calculations")
             .usingGeneratedKeyColumns("id")
 
+        // mapOf(key to value) : 읽기 전용 map -> 불변
+        // mutableMapOf : 값 추가/수정 가능한 map
         val values = mapOf(
             "user_id" to calculator.user_id,
             "operand1" to calculator.operand1,

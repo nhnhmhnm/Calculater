@@ -18,8 +18,6 @@ class CalculatorServiceTest : BehaviorSpec({
     val calculatorRepository = mockk<CalculatorRepository>(relaxed = true)
     val calculatorService = CalculatorService(calculatorRepository)
 
-    val saveSlot = slot<Calculator>()
-
     val user_id = 1L
 
     Given("정수 두 개와 연산자가 주어진 상태에서") {
@@ -193,6 +191,8 @@ class CalculatorServiceTest : BehaviorSpec({
             }
         }
         When("정상적으로 작동한 경우") {
+            val slot = slot<Calculator>()
+
             val request = CalculatorRequest(BigDecimal("5"), "+", BigDecimal("5"))
 
             val calculator = Calculator(
@@ -204,7 +204,7 @@ class CalculatorServiceTest : BehaviorSpec({
                 result = BigDecimal("10"),
                 time = LocalDateTime.now()
             )
-            every { calculatorRepository.save(capture(saveSlot)) } returns calculator
+            every { calculatorRepository.save(capture(slot)) } returns calculator
 
             val response = calculatorService.calculate(user_id, request)
 
@@ -212,13 +212,12 @@ class CalculatorServiceTest : BehaviorSpec({
                 response.result shouldBe BigDecimal("10")
             }
             Then("결과가 저장돼야 한다.") {
-                saveSlot.captured.user_id shouldBe user_id
-                saveSlot.captured.operand1 shouldBe BigDecimal("5")
-                saveSlot.captured.operand2 shouldBe BigDecimal("5")
-                saveSlot.captured.operator shouldBe "+"
-                saveSlot.captured.result shouldBe BigDecimal("10")
+                slot.captured.user_id shouldBe user_id
+                slot.captured.operand1 shouldBe BigDecimal("5")
+                slot.captured.operand2 shouldBe BigDecimal("5")
+                slot.captured.operator shouldBe "+"
+                slot.captured.result shouldBe BigDecimal("10")
             }
         }
     }
-
 })

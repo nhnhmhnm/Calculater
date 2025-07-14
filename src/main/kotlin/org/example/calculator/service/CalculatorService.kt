@@ -17,7 +17,7 @@ import java.time.LocalDateTime
 class CalculatorService(
     private val calculatorRepository: CalculatorRepository
 ) {
-    fun calculate(user_id: Long, request: CalculatorRequest) : CalculatorResponse {
+    fun calculate(user_id: Long, request: CalculatorRequest): CalculatorResponse {
         // 계산
         val (operand1, operatorStr, operand2) = request
         val operatorEnum = Operator.toEnum(operatorStr)
@@ -35,10 +35,10 @@ class CalculatorService(
         // 저장
         val calculatorLog = Calculator(
             user_id = user_id,
-            operand1 = operand1,
+            operand1 = operand1.stripTrailingZeros(),
             operator = operatorStr,
-            operand2 = operand2,
-            result = result,
+            operand2 = operand2.stripTrailingZeros(),
+            result = result.stripTrailingZeros(),
             time = LocalDateTime.now()
         )
         calculatorRepository.save(calculatorLog)

@@ -1,19 +1,19 @@
 package org.example.calculator.repository
 
 import org.example.calculator.domain.Calculator
-import org.hibernate.query.sqm.tree.SqmNode.log
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 
 @Repository
 class CalculatorRepository(
-    val jdbcTemplate : JdbcTemplate
+    private val namedParameterJdbcTemplate : NamedParameterJdbcTemplate
 ) {
     // RowMapper: ResultSet → Calculator 객체로 매핑
-    private val mapper = RowMapper<Calculator> { rs: ResultSet, _ ->
+    private val rowMapper = RowMapper<Calculator> { rs: ResultSet, _ ->
         Calculator(
             id = rs.getLong("id"),
             user_id = rs.getLong("user_id"),
@@ -26,52 +26,36 @@ class CalculatorRepository(
     }
 
     // 계산 기록 저장
-    fun save(calculator: Calculator): Calculator {
-//        // id 값은 자동 증가로 생략 -> id 값을 모름 -> select로 조회해야 함
-//        val sql = """
-//            INSERT INTO calculations (user_id, operand1, operator, operand2, result, time)
-//            VALUES (?, ?, ?, ?, ?, ?)
-//        """.trimIndent()
-//
-//        jdbcTemplate.update(
-//            sql,
-//            calculator.user_id,
-//            calculator.operand1,
-//            calculator.operator,
-//            calculator.operand2,
-//            calculator.result,
-//            calculator.time
-//        }
+    fun save(calculator: Calculator): Long {
+        val sql = """
+            INSERT INTO calculations (user_id, operand1, operator, operand2, result, time)
+            VALUES (:user_id, :operand1, :operator, :operand2, :result, :time)
+        """.trimIndent()
 
-        val simpleJdbcOrderInsert = SimpleJdbcInsert(jdbcTemplate)
-            .withTableName("calculations")
-            .usingGeneratedKeyColumns("id")
+        val paramMap = MapSqlParameterSource()
+            .addValue("user_id", calculator.user_id)
+            .addValue("operand1", calculator.operand1)
+            .addValue("operator", calculator.operator)
+            .addValue("operand2", calculator.operand2)
+            .addValue("result", calculator.result)
+            .addValue("time", calculator.time)
 
-        // mapOf(key to value) : 읽기 전용 map -> 불변
-        // mutableMapOf : 값 추가/수정 가능한 map
-        val values = mapOf(
-            "user_id" to calculator.user_id,
-            "operand1" to calculator.operand1,
-            "operator" to calculator.operator,
-            "operand2" to calculator.operand2,
-            "result" to calculator.result,
-            "time" to calculator.time
-        )
-        val newId = simpleJdbcOrderInsert.executeAndReturnKey(values).toLong()
+        val keyHolder = GeneratedKeyHolder()
+        namedParameterJdbcTemplate.update(sql, paramMap, keyHolder, arrayOf("id"))
+        val newId = keyHolder.key!!.toLong()
 
-        log.info("Generated key insert: $newId")
-
-        return calculator.copy(id = newId)
+        return newId
     }
 
     // 특정 사용자(user_id)의 계산 기록 조회 (시간순 내림차순)
     fun findByUser_Id(user_id: Long): List<Calculator> {
         val sql = """
             SELECT * FROM calculations
-            WHERE user_id = ?
+            WHERE user_id = :user_id
             ORDER BY time DESC
         """.trimIndent()
 
-        return jdbcTemplate.query(sql, mapper, user_id)
+        val params = mapOf("user_id" to user_id)
+        return namedParameterJdbcTemplate.query(sql, params, rowMapper)
     }
 }

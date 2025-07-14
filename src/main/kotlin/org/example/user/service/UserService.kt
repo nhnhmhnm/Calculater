@@ -1,5 +1,6 @@
 package org.example.user.service
 
+import jakarta.transaction.Transactional
 import org.example.exception.CustomException
 import org.example.exception.CustomExceptionWrapper
 import org.example.user.domain.User
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service
 class UserService(
     private val userRepository: UserRepository
 ) {
+    @Transactional
     fun createUser(request: CreateUserRequest): UserResponse {
         // ID 중복 체크
         if (userRepository.existsByUserID(request.userID)) {
@@ -34,6 +36,7 @@ class UserService(
         return user.toResponse()
     }
 
+    @Transactional
     fun updateUserPassword(id: Long, request: UpdateUserPasswordRequest): UserResponse {
         val user = userRepository.findById(id)
             .orElseThrow { CustomExceptionWrapper(CustomException.USER_NOT_FOUND) }
@@ -51,6 +54,7 @@ class UserService(
         return userRepository.save(updated).toResponse()
     }
 
+    @Transactional
     fun deleteUser(id: Long) {
         val user = userRepository.findById(id)
             .orElseThrow { CustomExceptionWrapper(CustomException.USER_NOT_FOUND) }

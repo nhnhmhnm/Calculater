@@ -1,5 +1,6 @@
 package org.example.calculator.service
 
+import jakarta.transaction.Transactional
 import org.example.calculator.domain.Calculator
 import org.example.calculator.domain.Operator
 import org.example.calculator.dto.CalculatorLogResponse
@@ -17,6 +18,7 @@ import java.time.LocalDateTime
 class CalculatorService(
     private val calculatorRepository: CalculatorRepository
 ) {
+    @Transactional
     fun calculate(user_id: Long, request: CalculatorRequest): CalculatorResponse {
         // 계산
         val (operand1, operatorStr, operand2) = request
